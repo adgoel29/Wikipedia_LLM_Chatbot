@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from Wiki.chatbot import WikiChatbot
+from chatbot import WikiChatbot
 
 app = FastAPI(title="Wikipedia + Ollama Chatbot (sync with Langfuse)")
 
