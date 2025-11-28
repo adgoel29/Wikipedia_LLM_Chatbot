@@ -6,80 +6,207 @@
     <title>Wikipedia + Ollama Chatbot</title>
 
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background: #0f0f0f;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2d3748;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            left: -200px;
+            animation: float 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(118, 75, 162, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -150px;
+            right: -150px;
+            animation: float 25s ease-in-out infinite reverse;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(50px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-30px, 30px) scale(0.9);
+            }
+        }
+
+        #app-wrapper {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 700px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        #header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         #chat-container {
             flex: 1;
-            padding: 20px;
+            padding: 24px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
         }
 
         .msg {
-            padding: 12px 16px;
-            margin: 10px 0;
-            max-width: 80%;
-            border-radius: 12px;
+            padding: 14px 18px;
+            max-width: 75%;
+            border-radius: 18px;
             white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .user {
-            background: #1e90ff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             align-self: flex-end;
+            border-bottom-right-radius: 4px;
         }
 
         .bot {
-            background: #333333;
+            background: #f7fafc;
+            color: #2d3748;
             align-self: flex-start;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
         }
 
         #input-container {
             display: flex;
-            padding: 12px;
-            background: #111;
-            border-top: 1px solid #333;
+            padding: 20px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #e2e8f0;
+            gap: 12px;
         }
 
         #user-input {
             flex: 1;
-            padding: 12px;
-            border: none;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
             outline: none;
-            background: #222;
-            color: white;
-            border-radius: 8px;
+            background: white;
+            color: #2d3748;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: #667eea;
         }
 
         #send-btn {
-            padding: 12px 20px;
+            padding: 14px 28px;
             border: none;
-            background: #1e90ff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            margin-left: 10px;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         #send-btn:hover {
-            background: #1c7ed6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #send-btn:active {
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <div id="chat-container"></div>
+    <div id="app-wrapper">
+        <div id="header">Wikipedia + Ollama Chat</div>
+        
+        <div id="chat-container"></div>
 
-    <div id="input-container">
-        <input id="user-input" placeholder="Ask something…" />
-        <button id="send-btn">Send</button>
+        <div id="input-container">
+            <input id="user-input" placeholder="Ask something…" />
+            <button id="send-btn">Send</button>
+        </div>
     </div>
 
     <script>
@@ -105,20 +232,24 @@
 
             const botMsg = addMessage("", "bot");
 
-            const resp = await fetch("http://127.0.0.1:8000/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question })
-            });
+            try {
+                const resp = await fetch("http://127.0.0.1:8000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question })
+                });
 
-            const reader = resp.body.getReader();
-            const decoder = new TextDecoder();
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                botMsg.textContent += decoder.decode(value);
-                chat.scrollTop = chat.scrollHeight;
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    botMsg.textContent += decoder.decode(value);
+                    chat.scrollTop = chat.scrollHeight;
+                }
+            } catch (error) {
+                botMsg.textContent = "Error: Could not connect to the server.";
             }
         }
 
